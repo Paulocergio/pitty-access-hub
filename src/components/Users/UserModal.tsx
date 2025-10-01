@@ -38,18 +38,21 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
     isActive: true,
   });
 
-  // Preenche os campos ao editar
+  // novo: controle para alterar senha no modo edição
+  const [alterarSenha, setAlterarSenha] = useState(false);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
         name: initialData.name,
         email: initialData.email,
         phone: initialData.phone,
-        password: initialData.password,
-        confirmarSenha: initialData.password,
+        password: "",          // senha vazia ao editar
+        confirmarSenha: "",    // senha vazia ao editar
         role: initialData.role,
         isActive: initialData.isActive,
       });
+      setAlterarSenha(false);  // por padrão, não altera senha
     } else {
       setFormData({
         name: "",
@@ -60,6 +63,7 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
         role: UserRole.User,
         isActive: true,
       });
+      setAlterarSenha(true);   // no cadastro, precisa de senha
     }
   }, [initialData]);
 
@@ -68,16 +72,30 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.email || !formData.password) {
-      alert("⚠️ Preencha todos os campos obrigatórios.");
-      return;
-    }
-    if (formData.password !== formData.confirmarSenha) {
-      alert("⚠️ As senhas não coincidem.");
+    if (!formData.name || !formData.email) return;
+
+    // Criar: senha obrigatória
+    if (!initialData) {
+      if (!formData.password) return;
+      if (formData.password !== formData.confirmarSenha) return;
+      onSubmit(formData);
       return;
     }
 
-    onSubmit(formData);
+    // Editar: somente valida/enviar senha se o usuário optou por alterar
+    if (initialData) {
+      if (alterarSenha) {
+        if (!formData.password) return;
+        if (formData.password !== formData.confirmarSenha) return;
+        onSubmit(formData);
+        return;
+      }
+
+      // não alterar senha → remove campos antes de enviar
+      const { password, confirmarSenha, ...dataSemSenha } = formData;
+      onSubmit(dataSemSenha as UserFormData);
+      return;
+    }
   };
 
   return (
@@ -138,37 +156,65 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
             />
           </div>
 
-          {/* Senha e Confirmar Senha - SEMPRE LADO A LADO */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Senha <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-                className="transition-all focus:ring-2 focus:ring-primary/20"
+          {/* Toggle de senha só no modo edição */}
+          {initialData && (
+            <div className="flex items-center gap-2">
+              <input
+                id="toggleSenha"
+                type="checkbox"
+                checked={alterarSenha}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setAlterarSenha(checked);
+                  if (!checked) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      password: "",
+                      confirmarSenha: "",
+                    }));
+                  }
+                }}
+                className="h-4 w-4"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmarSenha" className="text-sm font-medium">
-                Confirmar Senha <span className="text-red-500">*</span>
+              <Label htmlFor="toggleSenha" className="text-sm font-medium">
+                Alterar senha
               </Label>
-              <Input
-                id="confirmarSenha"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmarSenha}
-                onChange={(e) => handleChange("confirmarSenha", e.target.value)}
-                className="transition-all focus:ring-2 focus:ring-primary/20"
-              />
             </div>
-          </div>
+          )}
 
-          {/* Tipo de Acesso e Status - SEMPRE LADO A LADO */}
+          {/* Senha e Confirmar Senha */}
+          {(!initialData || alterarSenha) && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Senha <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  className="transition-all focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmarSenha" className="text-sm font-medium">
+                  Confirmar Senha <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="confirmarSenha"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.confirmarSenha}
+                  onChange={(e) => handleChange("confirmarSenha", e.target.value)}
+                  className="transition-all focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Tipo de Acesso e Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="role" className="text-sm font-medium">
@@ -206,9 +252,7 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
               </Label>
               <Select
                 value={formData.isActive ? "true" : "false"}
-                onValueChange={(val) =>
-                  handleChange("isActive", val === "true")
-                }
+                onValueChange={(val) => handleChange("isActive", val === "true")}
               >
                 <SelectTrigger id="status" className="transition-all focus:ring-2 focus:ring-primary/20">
                   <SelectValue placeholder="Selecione" />

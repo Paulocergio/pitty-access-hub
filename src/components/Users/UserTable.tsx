@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Edit, Trash2, Mail, Phone, User } from "lucide-react";
 import { Users, UserRole } from "@/types/Users/User";
+import formatPhone from "@/utils/formatPhone";
+
 
 interface UserTableProps {
   users: Users[];
@@ -18,7 +20,6 @@ interface UserTableProps {
 }
 
 const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
-  // Converte enum para string legível
   const getRoleName = (role: UserRole) => {
     switch (role) {
       case UserRole.Admin:
@@ -34,12 +35,13 @@ const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
     <div>
       {/* --- TABELA (DESKTOP) --- */}
       <div className="hidden md:block overflow-x-auto">
-        <div className="rounded-lg border shadow-sm bg-white min-w-[600px]">
+        <div className="rounded-lg border shadow-sm bg-white min-w-[700px]">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableHead className="font-semibold text-foreground">Nome</TableHead>
                 <TableHead className="font-semibold text-foreground">E-mail</TableHead>
+                <TableHead className="font-semibold text-foreground">Telefone</TableHead>
                 <TableHead className="font-semibold text-foreground">Tipo de Acesso</TableHead>
                 <TableHead className="font-semibold text-foreground">Status</TableHead>
                 <TableHead className="text-right font-semibold text-foreground">Ações</TableHead>
@@ -51,11 +53,13 @@ const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
                   <TableRow key={user.id} className="hover:bg-muted/30 transition-colors">
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                   <TableCell className="text-muted-foreground">
+  {formatPhone(user.phone)}
+</TableCell>
+
                     <TableCell>
                       <Badge
-                        variant={
-                          user.role === UserRole.Admin ? "default" : "secondary"
-                        }
+                        variant={user.role === UserRole.Admin ? "default" : "secondary"}
                         className="font-medium"
                       >
                         {getRoleName(user.role)}
@@ -97,7 +101,7 @@ const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                     Nenhum usuário encontrado.
                   </TableCell>
                 </TableRow>
@@ -111,7 +115,10 @@ const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
       <div className="md:hidden space-y-4">
         {users.length > 0 ? (
           users.map((user) => (
-            <div key={user.id} className="border rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition-shadow">
+            <div
+              key={user.id}
+              className="border rounded-lg p-4 shadow-sm bg-white hover:shadow-md transition-shadow"
+            >
               {/* Header do Card */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -137,9 +144,10 @@ const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
                   <span className="truncate">{user.email}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4 text-green-500 flex-shrink-0" />
-                  <span>{user.phone}</span>
-                </div>
+  <Phone className="w-4 h-4 text-green-500 flex-shrink-0" />
+  <span>{formatPhone(user.phone)}</span>
+</div>
+
               </div>
 
               {/* Footer com Status e Ações */}
