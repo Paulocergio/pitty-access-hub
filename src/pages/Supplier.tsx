@@ -6,8 +6,13 @@ import { Search, Plus } from "lucide-react";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
-import { Supplier } from "../types/Users/Supplier/Supplier";
-import { getSuppliers, createSupplier, updateSupplier, deleteSupplier } from "@/services/SupplierService";
+import { Supplier } from "@/types/Users/Supplier/Supplier";
+import {
+  getSuppliers,
+  createSupplier,
+  updateSupplier,
+  deleteSupplier,
+} from "@/services/SupplierService";
 
 import SupplierTable from "@/components/Suppliers/SupplierTable";
 import SupplierPagination from "@/components/Suppliers/SupplierPagination";
@@ -16,13 +21,13 @@ import SupplierModal from "@/components/Suppliers/SupplierModal";
 
 const SupplierPage = () => {
   const { toast } = useToast();
-
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -31,9 +36,6 @@ const SupplierPage = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-
   const loadSuppliers = async () => {
     setLoading(true);
     try {
@@ -41,11 +43,6 @@ const SupplierPage = () => {
       setSuppliers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao carregar fornecedores", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os fornecedores",
-      });
       setSuppliers([]);
     } finally {
       setLoading(false);
@@ -58,82 +55,94 @@ const SupplierPage = () => {
 
   const filteredSuppliers = suppliers.filter(
     (s) =>
-      s.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchTerm.toLowerCase())
+      (s.CompanyName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.DocumentNumber || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (s.Email || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalItems = filteredSuppliers.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentSuppliers = filteredSuppliers.slice(startIndex, startIndex + itemsPerPage);
-
-  const handleAddSupplier = () => {
-    setEditingSupplier(null);
-    setDialogOpen(true);
-  };
-
+  const currentSuppliers = filteredSuppliers.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
   const handleEditSupplier = (supplier: Supplier) => {
     setEditingSupplier(supplier);
     setDialogOpen(true);
   };
 
-  const handleDeleteSupplier = async (id: number) => {
-    try {
-      await deleteSupplier(id);
-      toast({ title: "Fornecedor excluído", description: "O fornecedor foi removido com sucesso." });
-      await loadSuppliers();
-    } catch (error) {
-      console.error("Erro ao excluir fornecedor", error);
-      toast({ variant: "destructive", title: "Erro", description: "Não foi possível excluir o fornecedor" });
-    }
-  };
-
-  const handleSubmit = async (data: Omit<Supplier, "id">) => {
+  const handleSubmit = async (
+    data: Omit<Supplier, "Id" | "CreatedAt" | "UpdatedAt">
+  ) => {
     try {
       if (editingSupplier) {
         await updateSupplier({ ...editingSupplier, ...data });
-        toast({ title: "Fornecedor atualizado", description: "Dados atualizados com sucesso." });
+        toast({ title: "Fornecedor atualizado com sucesso" });
       } else {
-        await createSupplier({ id: 0, ...data } as Supplier);
-        toast({ title: "Fornecedor criado", description: "Novo fornecedor cadastrado com sucesso." });
+        await createSupplier(data as Omit<Supplier, "Id">);
+        toast({ title: "Fornecedor criado com sucesso" });
       }
       await loadSuppliers();
       setDialogOpen(false);
       setEditingSupplier(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erro ao salvar fornecedor", error);
       throw error;
     }
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteSupplier(id);
+      toast({ title: "Fornecedor excluído com sucesso" });
+      await loadSuppliers();
+    } catch (error) {
+      console.error("Erro ao excluir fornecedor", error);
+    }
+  };
+
   return (
     <DashboardLayout>
-      <Card className="card-shadow">
-        <CardHeader className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center space-x-2 w-full sm:w-auto">
-              <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar fornecedores..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full sm:max-w-sm"
+                className="pl-9"
               />
             </div>
-            <Button onClick={handleAddSupplier} className="btn-gradient w-full sm:w-auto">
+            <Button
+              onClick={() => {
+                setEditingSupplier(null);
+                setDialogOpen(true);
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" />
-              Adicionar Fornecedor
+              Adicionar
             </Button>
           </div>
         </CardHeader>
 
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Carregando fornecedores...</div>
+            <div className="text-center py-8 text-muted-foreground">
+              Carregando...
+            </div>
           ) : !isMobile ? (
             <>
-              <SupplierTable suppliers={currentSuppliers} onEdit={handleEditSupplier} onDelete={handleDeleteSupplier} />
-              {totalItems > 0 && (
+              <SupplierTable
+                suppliers={currentSuppliers}
+                onEdit={handleEditSupplier}
+                onDelete={handleDelete}
+              />
+
+              {filteredSuppliers.length > 0 && (
                 <SupplierPagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -148,13 +157,20 @@ const SupplierPage = () => {
               <div className="space-y-4">
                 {currentSuppliers.length > 0 ? (
                   currentSuppliers.map((supplier) => (
-                    <SupplierCard key={supplier.id} supplier={supplier} onEdit={handleEditSupplier} onDelete={handleDeleteSupplier} />
+                    <SupplierCard
+                      key={supplier.Id}
+                      supplier={supplier}
+                      onEdit={handleEditSupplier}
+                      onDelete={handleDelete}
+                    />
                   ))
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">Nenhum fornecedor encontrado.</div>
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nenhum fornecedor encontrado
+                  </div>
                 )}
               </div>
-              {totalItems > 0 && (
+              {filteredSuppliers.length > 0 && (
                 <SupplierPagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -170,7 +186,10 @@ const SupplierPage = () => {
 
       <SupplierModal
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditingSupplier(null);
+        }}
         onSubmit={handleSubmit}
         initialData={editingSupplier}
       />

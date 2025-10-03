@@ -6,239 +6,213 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Supplier } from "../../types/Users/Supplier/Supplier";
+import { Supplier } from "@/types/Users/Supplier/Supplier";
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 import { fetchCnpj } from "@/services/brasilApiService";
+
 interface SupplierModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<Supplier, "id">) => void;
+  onSubmit: (data: Omit<Supplier, "Id" | "CreatedAt" | "UpdatedAt">) => Promise<void>;
   initialData?: Supplier | null;
 }
 
 const SupplierModal = ({ open, onClose, onSubmit, initialData }: SupplierModalProps) => {
-  const [formData, setFormData] = useState<Omit<Supplier, "id">>({
-    documentNumber: "",
-    companyName: "",
-    address: "",
-    number: "",
-    neighborhood: "",
-    city: "",
-    state: "",
-    postalCode: "",
-    phone: "",
-    registrationStatus: "ATIVA",
-    branchType: "",
-    email: "",
-    createdAt: "",
-    updatedAt: "",
+  const [formData, setFormData] = useState<Omit<Supplier, "Id" | "CreatedAt" | "UpdatedAt">>({
+    DocumentNumber: "",
+    CompanyName: "",
+    Address: "",
+    Number: "",
+    Neighborhood: "",
+    City: "",
+    State: "",
+    PostalCode: "",
+    Phone: "",
+    RegistrationStatus: "ATIVA",
+    BranchType: "",
+    Email: "",
   });
 
   useEffect(() => {
     if (initialData) {
-      const { id, ...rest } = initialData;
+      const { Id, CreatedAt, UpdatedAt, ...rest } = initialData;
       setFormData(rest);
     } else {
       setFormData({
-        documentNumber: "",
-        companyName: "",
-        address: "",
-        number: "",
-        neighborhood: "",
-        city: "",
-        state: "",
-        postalCode: "",
-        phone: "",
-        registrationStatus: "ATIVA",
-        branchType: "",
-        email: "",
-        createdAt: "",
-        updatedAt: "",
+        DocumentNumber: "",
+        CompanyName: "",
+        Address: "",
+        Number: "",
+        Neighborhood: "",
+        City: "",
+        State: "",
+        PostalCode: "",
+        Phone: "",
+        RegistrationStatus: "ATIVA",
+        BranchType: "",
+        Email: "",
       });
     }
-  }, [initialData]);
+  }, [initialData, open]);
 
-  const handleChange = (field: keyof typeof formData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleSubmit = async () => {
+    if (!formData.CompanyName || !formData.DocumentNumber) return;
+    await onSubmit(formData);
   };
 
-  const handleSubmit = () => {
-    onSubmit(formData);
+  const handleCnpjBlur = async () => {
+    if (formData.DocumentNumber.length < 14) return;
+    const data = await fetchCnpj(formData.DocumentNumber);
+    if (data) {
+      setFormData((prev) => ({
+        ...prev,
+        CompanyName: data.razao_social || prev.CompanyName,
+        Address: data.logradouro || prev.Address,
+        Number: data.numero || prev.Number,
+        Neighborhood: data.bairro || prev.Neighborhood,
+        City: data.municipio || prev.City,
+        State: data.uf || prev.State,
+        PostalCode: data.cep || prev.PostalCode,
+        Phone: data.ddd_telefone_1 || prev.Phone,
+        Email: data.email || prev.Email,
+        RegistrationStatus: data.descricao_situacao_cadastral?.toUpperCase() || prev.RegistrationStatus,
+      }));
+    }
   };
-
-
-
-
-const handleCnpjBlur = async () => {
-  if (formData.documentNumber.length < 14) return;
-
-  const data = await fetchCnpj(formData.documentNumber);
-  if (data) {
-    setFormData((prev) => ({
-      ...prev,
-      companyName: data.razao_social || prev.companyName,
-      address: data.logradouro || prev.address,
-      number: data.numero || prev.number,
-      neighborhood: data.bairro || prev.neighborhood,
-      city: data.municipio || prev.city,
-      state: data.uf || prev.state,
-      postalCode: data.cep || prev.postalCode,
-      phone: data.ddd_telefone_1 || prev.phone,
-      email: data.email || prev.email,
-      registrationStatus: data.descricao_situacao_cadastral?.toUpperCase() || prev.registrationStatus,
-    }));
-  }
-};
-
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-semibold">
-            {initialData ? "Editar Fornecedor" : "Adicionar Fornecedor"}
+        <DialogHeader>
+          <DialogTitle className="text-xl">
+            {initialData ? "Editar Fornecedor" : "Novo Fornecedor"}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {initialData
-              ? "Atualize as informações do fornecedor abaixo."
-              : "Preencha os dados para cadastrar um novo fornecedor."}
-          </p>
         </DialogHeader>
 
-        <div className="grid gap-5 py-4">
-
-
+        <div className="space-y-4 py-4">
           <div className="space-y-2">
-  <Label htmlFor="documentNumber">CNPJ</Label>
-  <Input
-    id="documentNumber"
-    placeholder="00.000.000/0000-00"
-    value={formData.documentNumber}
-    onChange={(e) => handleChange("documentNumber", e.target.value)}
-    onBlur={handleCnpjBlur}
-  />
-</div>
-
-
-          <div className="space-y-2">
-            <Label htmlFor="companyName">Razão Social</Label>
+            <Label htmlFor="DocumentNumber">CNPJ *</Label>
             <Input
-              id="companyName"
-              placeholder="Digite a razão social"
-              value={formData.companyName}
-              onChange={(e) => handleChange("companyName", e.target.value)}
+              id="DocumentNumber"
+              placeholder="00.000.000/0000-00"
+              value={formData.DocumentNumber}
+              onChange={(e) => setFormData({ ...formData, DocumentNumber: e.target.value })}
+              onBlur={handleCnpjBlur}
             />
           </div>
 
-
-
-          {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="CompanyName">Razão Social *</Label>
             <Input
-              id="email"
+              id="CompanyName"
+              placeholder="Nome da empresa"
+              value={formData.CompanyName}
+              onChange={(e) => setFormData({ ...formData, CompanyName: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="Email">Email</Label>
+            <Input
+              id="Email"
               type="email"
-              placeholder="fornecedor@email.com"
-              value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
+              placeholder="email@exemplo.com"
+              value={formData.Email}
+              onChange={(e) => setFormData({ ...formData, Email: e.target.value })}
             />
           </div>
 
-          {/* Telefone */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
+            <Label htmlFor="Phone">Telefone</Label>
             <Input
-              id="phone"
+              id="Phone"
               placeholder="(00) 00000-0000"
-              value={formData.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
+              value={formData.Phone}
+              onChange={(e) => setFormData({ ...formData, Phone: e.target.value })}
             />
           </div>
 
-          {/* Endereço */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="address">Endereço</Label>
+              <Label htmlFor="Address">Endereço</Label>
               <Input
-                id="address"
-                placeholder="Rua Exemplo"
-                value={formData.address}
-                onChange={(e) => handleChange("address", e.target.value)}
+                id="Address"
+                placeholder="Rua"
+                value={formData.Address}
+                onChange={(e) => setFormData({ ...formData, Address: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="number">Número</Label>
+              <Label htmlFor="Number">Número</Label>
               <Input
-                id="number"
+                id="Number"
                 placeholder="123"
-                value={formData.number}
-                onChange={(e) => handleChange("number", e.target.value)}
+                value={formData.Number}
+                onChange={(e) => setFormData({ ...formData, Number: e.target.value })}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="neighborhood">Bairro</Label>
+              <Label htmlFor="Neighborhood">Bairro</Label>
               <Input
-                id="neighborhood"
-                placeholder="Centro"
-                value={formData.neighborhood}
-                onChange={(e) => handleChange("neighborhood", e.target.value)}
+                id="Neighborhood"
+                placeholder="Bairro"
+                value={formData.Neighborhood}
+                onChange={(e) => setFormData({ ...formData, Neighborhood: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="postalCode">CEP</Label>
+              <Label htmlFor="PostalCode">CEP</Label>
               <Input
-                id="postalCode"
+                id="PostalCode"
                 placeholder="00000-000"
-                value={formData.postalCode}
-                onChange={(e) => handleChange("postalCode", e.target.value)}
+                value={formData.PostalCode}
+                onChange={(e) => setFormData({ ...formData, PostalCode: e.target.value })}
               />
             </div>
           </div>
 
-          {/* Cidade e Estado */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">Cidade</Label>
+              <Label htmlFor="City">Cidade</Label>
               <Input
-                id="city"
-                placeholder="Digite a cidade"
-                value={formData.city}
-                onChange={(e) => handleChange("city", e.target.value)}
+                id="City"
+                placeholder="Cidade"
+                value={formData.City}
+                onChange={(e) => setFormData({ ...formData, City: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="state">Estado</Label>
+              <Label htmlFor="State">Estado</Label>
               <Input
-                id="state"
+                id="State"
                 placeholder="UF"
-                value={formData.state}
-                onChange={(e) => handleChange("state", e.target.value)}
+                value={formData.State}
+                onChange={(e) => setFormData({ ...formData, State: e.target.value })}
               />
             </div>
           </div>
 
-          {/* Situação e Tipo */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="registrationStatus">Situação</Label>
+              <Label>Situação</Label>
               <Select
-                value={formData.registrationStatus}
-                onValueChange={(val) => handleChange("registrationStatus", val)}
+                value={formData.RegistrationStatus}
+                onValueChange={(val) => setFormData({ ...formData, RegistrationStatus: val })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ATIVA">Ativa</SelectItem>
@@ -248,23 +222,23 @@ const handleCnpjBlur = async () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="branchType">Tipo</Label>
+              <Label htmlFor="BranchType">Tipo</Label>
               <Input
-                id="branchType"
-                placeholder="Matriz / Filial"
-                value={formData.branchType}
-                onChange={(e) => handleChange("branchType", e.target.value)}
+                id="BranchType"
+                placeholder="Matriz/Filial"
+                value={formData.BranchType}
+                onChange={(e) => setFormData({ ...formData, BranchType: e.target.value })}
               />
             </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
           <Button onClick={handleSubmit}>
-            {initialData ? "Salvar Alterações" : "Criar Fornecedor"}
+            {initialData ? "Salvar" : "Criar"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,17 +1,17 @@
 export interface Supplier {
-  id: number;
-  documentNumber: string;
-  companyName: string;
-  address: string;
-  number: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  phone: string;
-  registrationStatus: string;
-  branchType: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string;
+  Id: number;
+  DocumentNumber: string;
+  CompanyName: string;
+  Address: string;
+  Number: string;
+  Neighborhood: string;
+  City: string;
+  State: string;
+  PostalCode: string;
+  Phone: string;
+  RegistrationStatus: string;
+  BranchType: string;
+  Email: string;
+  CreatedAt: string;
+  UpdatedAt: string;
 }

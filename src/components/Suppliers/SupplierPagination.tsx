@@ -18,10 +18,9 @@ const SupplierPagination = ({
   onPageChange,
 }: SupplierPaginationProps) => {
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
-      {/* Itens por página */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>Itens por página:</span>
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+      <div className="flex items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Itens por página:</span>
         <Select
           value={itemsPerPage.toString()}
           onValueChange={(value) => onItemsPerPageChange(Number(value))}
@@ -37,14 +36,8 @@ const SupplierPagination = ({
         </Select>
       </div>
 
-      {/* Navegação */}
       <div className="flex items-center gap-1">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(1)}
-          disabled={currentPage === 1}
-        >
+        <Button variant="outline" size="sm" onClick={() => onPageChange(1)} disabled={currentPage === 1}>
           <ChevronsLeft className="w-4 h-4" />
         </Button>
         <Button
@@ -56,12 +49,10 @@ const SupplierPagination = ({
           <ChevronLeft className="w-4 h-4" />
         </Button>
 
-        <div className="flex items-center gap-1 mx-2">
-          <span className="text-sm">Página</span>
-          <span className="text-sm font-medium">{currentPage}</span>
-          <span className="text-sm">de</span>
-          <span className="text-sm font-medium">{totalPages}</span>
-        </div>
+        <span className="mx-4 text-sm">
+          Página <span className="font-medium">{currentPage}</span> de{" "}
+          <span className="font-medium">{totalPages}</span>
+        </span>
 
         <Button
           variant="outline"
