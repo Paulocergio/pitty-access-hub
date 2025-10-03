@@ -30,6 +30,7 @@ const mainItems = [
   { title: "Usuários", url: "/usuarios", icon: Users },
   { title: "Clientes", url: "/clientes", icon: Building2 },
   { title: "Fornecedores", url: "/fornecedores", icon: Truck },
+   { title: "Orcamento", url: "/orcamento", icon: Truck },
 ];
 
 const systemItems = [

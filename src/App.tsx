@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import SupplierPage from "./pages/Supplier";
 import CustomerPage from "./pages/Customer";
+import BudgetPage from "./pages/BudgetPage";
 
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -55,6 +56,15 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <CustomerPage />
+              </ProtectedRoute>
+            }
+          />
+
+           <Route
+            path="/orcamento"
+            element={
+              <ProtectedRoute>
+                <BudgetPage />
               </ProtectedRoute>
             }
           />
