@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Supplier } from "@/types/Users/Supplier/Supplier";
+import { Supplier } from "@/types/Supplier/Supplier";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/Supplier`;
 

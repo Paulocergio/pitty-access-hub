@@ -9,61 +9,69 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Edit, Trash2, Building2 } from "lucide-react";
-import { Supplier } from "@/types/Supplier/Supplier";
+import { Customer } from "@/types/Customer/Customer";
 import formatPhone from "@/utils/formatPhone";
 
-interface SupplierTableProps {
-  suppliers: Supplier[];
-  onEdit: (supplier: Supplier) => void;
+interface CustomerTableProps {
+  customers: Customer[];
+  onEdit: (customer: Customer) => void;
   onDelete: (id: number) => void;
 }
 
-const SupplierTable = ({ suppliers, onEdit, onDelete }: SupplierTableProps) => {
+const CustomerTable = ({ customers, onEdit, onDelete }: CustomerTableProps) => {
   return (
     <div className="rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50">
             <TableHead>Razão Social</TableHead>
-            <TableHead>CNPJ</TableHead>
+            <TableHead>CPF/CNPJ</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Telefone</TableHead>
-            <TableHead>Cidade/UF</TableHead>
-            <TableHead>Situação</TableHead>
+            <TableHead>Endereço</TableHead>
+            <TableHead>CEP</TableHead>
+            <TableHead>Contato</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {suppliers.length > 0 ? (
-            suppliers.map((supplier) => (
-              <TableRow key={supplier.Id} className="hover:bg-muted/30">
-                <TableCell className="font-medium">{supplier.CompanyName}</TableCell>
-                <TableCell className="text-muted-foreground">{supplier.DocumentNumber}</TableCell>
-                <TableCell className="text-muted-foreground">{supplier.Email}</TableCell>
-                <TableCell className="text-muted-foreground">{formatPhone(supplier.Phone)}</TableCell>
+          {customers.length > 0 ? (
+            customers.map((customer) => (
+              <TableRow key={customer.Id} className="hover:bg-muted/30">
+                <TableCell className="font-medium">{customer.CompanyName}</TableCell>
                 <TableCell className="text-muted-foreground">
-                  {supplier.City}/{supplier.State}
+                  {customer.DocumentNumber}
+                </TableCell>
+                <TableCell className="text-muted-foreground">{customer.Email || "—"}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {formatPhone(customer.Phone)}
+                </TableCell>
+                <TableCell className="text-muted-foreground">{customer.Address}</TableCell>
+                <TableCell className="text-muted-foreground">{customer.PostalCode}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {customer.ContactPerson || "—"}
                 </TableCell>
                 <TableCell>
                   <Badge
                     className={
-                      supplier.RegistrationStatus?.toUpperCase() === "ATIVA"
+                      customer.IsActive
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
                     }
                   >
-                    {supplier.RegistrationStatus || "Desconhecida"}
+                    {customer.IsActive ? "Ativo" : "Inativo"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => onEdit(supplier)}>
+                    <Button variant="outline" size="sm" onClick={() => onEdit(customer)}>
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDelete(supplier.Id)}
+                      onClick={() => onDelete(customer.Id)}
                       className="text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -74,10 +82,10 @@ const SupplierTable = ({ suppliers, onEdit, onDelete }: SupplierTableProps) => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={7} className="h-32 text-center">
+              <TableCell colSpan={9} className="h-32 text-center">
                 <div className="flex flex-col items-center gap-2">
                   <Building2 className="w-12 h-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Nenhum fornecedor encontrado</p>
+                  <p className="text-muted-foreground">Nenhum cliente encontrado</p>
                 </div>
               </TableCell>
             </TableRow>
@@ -88,4 +96,4 @@ const SupplierTable = ({ suppliers, onEdit, onDelete }: SupplierTableProps) => {
   );
 };
 
-export default SupplierTable;
+export default CustomerTable;

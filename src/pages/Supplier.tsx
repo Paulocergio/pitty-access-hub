@@ -6,7 +6,7 @@ import { Search, Plus } from "lucide-react";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { useToast } from "@/hooks/use-toast";
 
-import { Supplier } from "@/types/Users/Supplier/Supplier";
+import { Supplier } from "@/types/Supplier/Supplier";
 import {
   getSuppliers,
   createSupplier,

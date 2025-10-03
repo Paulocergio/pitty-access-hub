@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import SupplierPage from "./pages/Supplier";
+import CustomerPage from "./pages/Customer";
 
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -40,15 +41,23 @@ const App = () => (
             }
           />
 
-         <Route
-  path="/fornecedores"
-  element={
-    <ProtectedRoute>
-      <SupplierPage />
-    </ProtectedRoute>
-  }
-/>
+          <Route
+            path="/fornecedores"
+            element={
+              <ProtectedRoute>
+                <SupplierPage />
+              </ProtectedRoute>
+            }
+          />
 
+          <Route
+            path="/clientes"
+            element={
+              <ProtectedRoute>
+                <CustomerPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />

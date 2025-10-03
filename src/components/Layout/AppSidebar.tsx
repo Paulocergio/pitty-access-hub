@@ -28,13 +28,12 @@ import { useToast } from "@/hooks/use-toast";
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Usuários", url: "/usuarios", icon: Users },
-  { title: "Clientes", url: "/clientes", icon: Building2, disabled: true },
+  { title: "Clientes", url: "/clientes", icon: Building2 },
   { title: "Fornecedores", url: "/fornecedores", icon: Truck },
 ];
 
-
 const systemItems = [
-  { title: "Configurações", url: "/configuracoes", icon: Settings, disabled: true },
+  { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -94,18 +93,7 @@ export function AppSidebar() {
                   >
                     <NavLink
                       to={item.url}
-                      className={`${
-                        isActive(item.url) ? "active" : ""
-                      } ${item.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                      onClick={(e) => {
-                        if (item.disabled) {
-                          e.preventDefault();
-                          toast({
-                            title: "Funcionalidade em desenvolvimento",
-                            description: `${item.title} será implementado em breve.`,
-                          });
-                        }
-                      }}
+                      className={`${isActive(item.url) ? "active" : ""}`}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!isCollapsed && <span className="truncate">{item.title}</span>}
@@ -125,23 +113,8 @@ export function AppSidebar() {
             <SidebarMenu className="space-y-1">
               {systemItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    className="sidebar-item"
-                  >
-                    <NavLink
-                      to={item.url}
-                      className={`${item.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                      onClick={(e) => {
-                        if (item.disabled) {
-                          e.preventDefault();
-                          toast({
-                            title: "Funcionalidade em desenvolvimento",
-                            description: `${item.title} será implementado em breve.`,
-                          });
-                        }
-                      }}
-                    >
+                  <SidebarMenuButton asChild className="sidebar-item">
+                    <NavLink to={item.url}>
                       <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!isCollapsed && <span className="truncate">{item.title}</span>}
                     </NavLink>

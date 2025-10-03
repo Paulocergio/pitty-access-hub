@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Supplier } from "@/types/Users/Supplier/Supplier";
+import { Supplier } from "@/types/Supplier/Supplier";
 import {
   Select,
   SelectTrigger,
