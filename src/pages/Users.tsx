@@ -93,23 +93,38 @@ const UsersPage = () => {
     }
   };
 
-  const handleSubmit = async (data: Omit<Users, "id">) => {
-    try {
-      if (editingUser) {
-        await updateUser({ ...editingUser, ...data });
-        toast({ title: "Usuário atualizado", description: "Dados atualizados com sucesso." });
-      } else {
-        await createUser({ id: 0, ...data });
-        toast({ title: "Usuário criado", description: "Novo usuário cadastrado com sucesso." });
-      }
-      await loadUsers();
-      setDialogOpen(false);
-      setEditingUser(null);
-    } catch (error) {
-      console.error("Erro ao salvar usuário", error);
-      toast({ variant: "destructive", title: "Erro", description: "Não foi possível salvar o usuário" });
+const handleSubmit = async (data: Omit<Users, "id">) => {
+  try {
+    if (editingUser) {
+      await updateUser({ ...editingUser, ...data });
+      toast({ title: "Usuário atualizado", description: "Dados atualizados com sucesso." });
+    } else {
+      await createUser({ id: 0, ...data });
+      toast({ title: "Usuário criado", description: "Novo usuário cadastrado com sucesso." });
     }
-  };
+
+    await loadUsers();
+
+    // só fecha se deu certo
+    setDialogOpen(false);
+    setEditingUser(null);
+
+  } catch (error: any) {
+    console.error("Erro ao salvar usuário", error);
+
+    if (error.response?.status !== 409) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível salvar o usuário",
+      });
+    }
+
+
+    throw error;
+  }
+};
+
 
   return (
     <DashboardLayout>
@@ -126,7 +141,7 @@ const UsersPage = () => {
               />
             </div>
 
-            {/* Botão sempre visível */}
+
             <Button onClick={handleAddUser} className="btn-gradient w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Adicionar Usuário

@@ -8,17 +8,38 @@ export const getUsers = async (): Promise<Users[]> => {
   return Array.isArray(response.data) ? response.data : [];
 };
 
-
 export const createUser = async (user: Users) => {
-  const { data } = await axios.post(API_URL, user);
-  return data;
+  try {
+    const { data } = await axios.post(API_URL, user);
+    return data;
+  } catch (error: any) {
+    // Se for erro vindo do backend, repassa para o UserModal
+    if (error.response) {
+      throw error; // repassa status + message do backend
+    }
+    throw new Error("Erro desconhecido ao criar usuário");
+  }
 };
 
 export const updateUser = async (user: Users) => {
-  const { data } = await axios.put(`${API_URL}/${user.id}`, user);
-  return data;
+  try {
+    const { data } = await axios.put(`${API_URL}/${user.id}`, user);
+    return data;
+  } catch (error: any) {
+    if (error.response) {
+      throw error;
+    }
+    throw new Error("Erro desconhecido ao atualizar usuário");
+  }
 };
 
 export const deleteUser = async (id: number) => {
-  await axios.delete(`${API_URL}/hard/${id}`);
-}
+  try {
+    await axios.delete(`${API_URL}/hard/${id}`);
+  } catch (error: any) {
+    if (error.response) {
+      throw error;
+    }
+    throw new Error("Erro desconhecido ao deletar usuário");
+  }
+};

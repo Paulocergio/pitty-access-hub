@@ -12,14 +12,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { 
-  Users, 
-  Building2, 
-  Package, 
-  DollarSign, 
-  Truck, 
-  BarChart3, 
-  Settings, 
+import {
+  Users,
+  Building2,
+  Package,
+  DollarSign,
+  Truck,
+  BarChart3,
+  Settings,
   LogOut,
   Home
 } from "lucide-react";
@@ -29,11 +29,9 @@ const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Usuários", url: "/usuarios", icon: Users },
   { title: "Clientes", url: "/clientes", icon: Building2, disabled: true },
-  { title: "Fornecedores", url: "/fornecedores", icon: Truck, disabled: true },
-  { title: "Produtos", url: "/produtos", icon: Package, disabled: true },
-  { title: "Financeiro", url: "/financeiro", icon: DollarSign, disabled: true },
-  { title: "Relatórios", url: "/relatorios", icon: BarChart3, disabled: true },
+  { title: "Fornecedores", url: "/fornecedores", icon: Truck },
 ];
+
 
 const systemItems = [
   { title: "Configurações", url: "/configuracoes", icon: Settings, disabled: true },
@@ -44,9 +42,9 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const isCollapsed = state === "collapsed";
-  
+
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("userEmail");

@@ -23,7 +23,7 @@ type UserFormData = Omit<Users, "id"> & { confirmarSenha?: string };
 interface UserModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: UserFormData) => void;
+  onSubmit: (data: UserFormData) => Promise<void>;
   initialData: Users | null;
 }
 
@@ -38,8 +38,8 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
     isActive: true,
   });
 
-  // novo: controle para alterar senha no modo edição
   const [alterarSenha, setAlterarSenha] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -47,12 +47,12 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
         name: initialData.name,
         email: initialData.email,
         phone: initialData.phone,
-        password: "",          // senha vazia ao editar
-        confirmarSenha: "",    // senha vazia ao editar
+        password: "",
+        confirmarSenha: "",
         role: initialData.role,
         isActive: initialData.isActive,
       });
-      setAlterarSenha(false);  // por padrão, não altera senha
+      setAlterarSenha(false);
     } else {
       setFormData({
         name: "",
@@ -63,7 +63,7 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
         role: UserRole.User,
         isActive: true,
       });
-      setAlterarSenha(true);   // no cadastro, precisa de senha
+      setAlterarSenha(true);
     }
   }, [initialData]);
 
@@ -71,32 +71,24 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.email) return;
+const handleSubmit = async () => {
+  if (!formData.name || !formData.email) return;
 
-    // Criar: senha obrigatória
-    if (!initialData) {
-      if (!formData.password) return;
-      if (formData.password !== formData.confirmarSenha) return;
-      onSubmit(formData);
-      return;
+  try {
+    // remove confirmarSenha e id antes de enviar
+    const { confirmarSenha, ...userData } = formData;
+
+    await onSubmit(userData as UserFormData);
+    setEmailError(null);
+  } catch (err: any) {
+    if (err?.response?.status === 409 && err?.response?.data?.message) {
+      setEmailError(err.response.data.message);
+    } else {
+      console.error("Erro inesperado:", err);
     }
+  }
+};
 
-    // Editar: somente valida/enviar senha se o usuário optou por alterar
-    if (initialData) {
-      if (alterarSenha) {
-        if (!formData.password) return;
-        if (formData.password !== formData.confirmarSenha) return;
-        onSubmit(formData);
-        return;
-      }
-
-      // não alterar senha → remove campos antes de enviar
-      const { password, confirmarSenha, ...dataSemSenha } = formData;
-      onSubmit(dataSemSenha as UserFormData);
-      return;
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -137,9 +129,17 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
               type="email"
               placeholder="exemplo@email.com"
               value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              className="transition-all focus:ring-2 focus:ring-primary/20"
+              onChange={(e) => {
+                handleChange("email", e.target.value);
+                setEmailError(null);
+              }}
+              className={`transition-all focus:ring-2 focus:ring-primary/20 ${
+                emailError ? "border-red-500" : ""
+              }`}
             />
+            {emailError && (
+              <p className="text-xs text-red-500 mt-1">{emailError}</p>
+            )}
           </div>
 
           {/* Telefone */}
@@ -156,7 +156,7 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
             />
           </div>
 
-          {/* Toggle de senha só no modo edição */}
+          {/* Toggle de senha */}
           {initialData && (
             <div className="flex items-center gap-2">
               <input
@@ -207,7 +207,9 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
                   type="password"
                   placeholder="••••••••"
                   value={formData.confirmarSenha}
-                  onChange={(e) => handleChange("confirmarSenha", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("confirmarSenha", e.target.value)
+                  }
                   className="transition-all focus:ring-2 focus:ring-primary/20"
                 />
               </div>
@@ -226,7 +228,10 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
                   handleChange("role", Number(val) as UserRole)
                 }
               >
-                <SelectTrigger id="role" className="transition-all focus:ring-2 focus:ring-primary/20">
+                <SelectTrigger
+                  id="role"
+                  className="transition-all focus:ring-2 focus:ring-primary/20"
+                >
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
@@ -252,9 +257,14 @@ const UserModal = ({ open, onClose, onSubmit, initialData }: UserModalProps) => 
               </Label>
               <Select
                 value={formData.isActive ? "true" : "false"}
-                onValueChange={(val) => handleChange("isActive", val === "true")}
+                onValueChange={(val) =>
+                  handleChange("isActive", val === "true")
+                }
               >
-                <SelectTrigger id="status" className="transition-all focus:ring-2 focus:ring-primary/20">
+                <SelectTrigger
+                  id="status"
+                  className="transition-all focus:ring-2 focus:ring-primary/20"
+                >
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>

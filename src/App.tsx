@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";   // ✅ corrigido (plural)
+import Users from "./pages/Users";
+import SupplierPage from "./pages/Supplier";
+
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -33,10 +35,21 @@ const App = () => (
             path="/usuarios"
             element={
               <ProtectedRoute>
-                <Users />   {/* ✅ nome certo */}
+                <Users />
               </ProtectedRoute>
             }
           />
+
+         <Route
+  path="/fornecedores"
+  element={
+    <ProtectedRoute>
+      <SupplierPage />
+    </ProtectedRoute>
+  }
+/>
+
+
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
