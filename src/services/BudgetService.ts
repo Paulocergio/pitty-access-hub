@@ -5,7 +5,29 @@ const API_URL = `${import.meta.env.VITE_API_URL}/Budget`;
 
 export const getBudgets = async (): Promise<Budget[]> => {
   const { data } = await axios.get(API_URL);
-  return data;
+
+  return data.map((b: any) => ({
+    Id: b.id,
+    BudgetNumber: b.budgetNumber,
+    CustomerName: b.customerName,
+    Email: b.email,
+    Phone: b.phone,
+    Address: b.address,
+    IssueDate: b.issueDate,
+    DueDate: b.dueDate,
+    Discount: b.discount,
+    Total: b.total,
+    CreatedAt: b.createdAt,
+    UpdatedAt: b.updatedAt,
+    Items: b.items?.map((i: any) => ({
+      Id: i.id,
+      BudgetId: i.budgetId,
+      Description: i.description,
+      Quantity: i.quantity,
+      UnitPrice: i.unitPrice,
+      Total: i.total,
+    })) || []
+  }));
 };
 
 export const createBudget = async (budget: Omit<Budget, "Id">) => {

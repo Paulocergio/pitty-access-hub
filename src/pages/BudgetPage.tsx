@@ -13,7 +13,8 @@ import BudgetTable from "@/components/budget/BudgetTable";
 import BudgetPagination from "@/components/budget/BudgetPagination";
 import BudgetCard from "@/components/budget/BudgetCard";
 import BudgetModal from "@/components/budget/BudgetModal";
-import { getBudgets, createBudget, updateBudget, deleteBudget } from "@/services/BudgetServiceMock";
+import { getBudgets, createBudget, updateBudget, deleteBudget } from "@/services/BudgetService";
+
 
 const BudgetPage = () => {
   const { toast } = useToast();
@@ -131,13 +132,15 @@ const BudgetPage = () => {
           ) : (
             <>
               <div className="space-y-4">
-                {currentBudgets.length > 0 ? (
-                  currentBudgets.map((budget) => (
-                    <BudgetCard key={budget.Id} budget={budget} onEdit={handleEditBudget} onDelete={handleDelete} />
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">Nenhum orçamento encontrado</div>
-                )}
+             {currentBudgets.map((budget, index) => (
+  <BudgetCard
+    key={budget.Id ?? `budget-${index}`}
+    budget={budget}
+    onEdit={handleEditBudget}
+    onDelete={handleDelete}
+  />
+))}
+
               </div>
               {filteredBudgets.length > 0 && (
                 <BudgetPagination

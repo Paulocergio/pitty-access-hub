@@ -16,9 +16,10 @@ const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => (
         <FileText className="w-4 h-4" />
         Orçamento #{budget.Id}
       </CardTitle>
-      <span className="text-purple-700 font-bold">
-        R$ {budget.Total.toFixed(2)}
-      </span>
+     <span className="text-purple-700 font-bold">
+  R$ {(Number(budget.Total) || 0).toFixed(2)}
+</span>
+
     </CardHeader>
     <CardContent className="space-y-3 text-sm text-muted-foreground">
       <p><strong>Cliente:</strong> {budget.CustomerName}</p>

@@ -42,7 +42,7 @@ interface BudgetModalProps {
 
 // Função para gerar número de orçamento aleatório
 const generateBudgetNumber = () => {
-  return `#${Math.floor(100000 + Math.random() * 900000)}`;
+  return `${Math.floor(100000 + Math.random() * 900000)}`;
 };
 
 const BudgetModal = ({ open, onClose, onSubmit, initialData }: BudgetModalProps) => {
@@ -87,11 +87,15 @@ const BudgetModal = ({ open, onClose, onSubmit, initialData }: BudgetModalProps)
     }));
   };
 
-  const handleItemChange = (index: number, field: keyof BudgetItem, value: any) => {
-    const newItems = [...formData.Items];
-    newItems[index][field] = value;
-    setFormData({ ...formData, Items: newItems });
-  };
+const handleItemChange = <K extends keyof BudgetItem>(
+  index: number,
+  field: K,
+  value: BudgetItem[K]
+) => {
+  const newItems = [...formData.Items];
+  newItems[index] = { ...newItems[index], [field]: value };
+  setFormData({ ...formData, Items: newItems });
+};
 
   const calculateSubtotal = () => {
     return formData.Items.reduce(
@@ -373,28 +377,7 @@ const BudgetModal = ({ open, onClose, onSubmit, initialData }: BudgetModalProps)
                     </div>
 
                     {/* Campo de Taxa/Imposto */}
-                    <div className="space-y-2 py-2 border-t border-purple-200">
-                      <Label className="text-sm font-medium text-gray-700">Taxa/Imposto (%)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        className="border-gray-300 focus:border-purple-500"
-                        placeholder="0"
-                        value={formData.Tax}
-                        onChange={(e) =>
-                          setFormData({ ...formData, Tax: Number(e.target.value) })
-                        }
-                      />
-                    </div>
 
-                    <div className="flex justify-between items-center text-blue-600">
-                      <span>Taxa/Imposto ({formData.Tax}%):</span>
-                      <span className="font-medium">
-                        +R$ {(subtotal * (formData.Tax / 100)).toFixed(2)}
-                      </span>
-                    </div>
 
                     <div className="border-t border-purple-300 pt-3 mt-3">
                       <div className="flex justify-between items-center">
@@ -430,4 +413,4 @@ const BudgetModal = ({ open, onClose, onSubmit, initialData }: BudgetModalProps)
   );
 };
 
-export default BudgetModal;
+export default BudgetModal
