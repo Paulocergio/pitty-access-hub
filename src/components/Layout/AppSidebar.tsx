@@ -70,10 +70,10 @@ export function AppSidebar() {
           {!isCollapsed && (
             <div className="min-w-0">
               <h2 className="font-bold text-lg text-sidebar-foreground truncate">
-                Pitty System
+                Pitty
               </h2>
               <p className="text-xs text-muted-foreground truncate">
-                v1.0.0
+
               </p>
             </div>
           )}

@@ -40,6 +40,13 @@ export const updateBudget = async (budget: Budget) => {
   return data;
 };
 
-export const deleteBudget = async (id: number) => {
+
+
+
+export const deleteBudget = async (id: number): Promise<void> => {
   await axios.delete(`${API_URL}/${id}`);
+};
+
+export const deleteBudgetItem = async (itemId: number): Promise<void> => {
+  await axios.delete(`${API_URL}/item/${itemId}`);
 };

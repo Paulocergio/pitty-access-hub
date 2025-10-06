@@ -8,13 +8,16 @@ import { useToast } from "@/hooks/use-toast";
 
 import { Budget } from "@/types/Budget/Budget";
 
-
 import BudgetTable from "@/components/budget/BudgetTable";
 import BudgetPagination from "@/components/budget/BudgetPagination";
 import BudgetCard from "@/components/budget/BudgetCard";
 import BudgetModal from "@/components/budget/BudgetModal";
-import { getBudgets, createBudget, updateBudget, deleteBudget } from "@/services/BudgetService";
-
+import {
+  getBudgets,
+  createBudget,
+  updateBudget,
+  deleteBudget,
+} from "@/services/BudgetService";
 
 const BudgetPage = () => {
   const { toast } = useToast();
@@ -58,7 +61,10 @@ const BudgetPage = () => {
 
   const totalPages = Math.ceil(filteredBudgets.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentBudgets = filteredBudgets.slice(startIndex, startIndex + itemsPerPage);
+  const currentBudgets = filteredBudgets.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handleEditBudget = (budget: Budget) => {
     setEditingBudget(budget);
@@ -107,7 +113,12 @@ const BudgetPage = () => {
                 className="pl-9"
               />
             </div>
-            <Button onClick={() => { setEditingBudget(null); setDialogOpen(true); }}>
+            <Button
+              onClick={() => {
+                setEditingBudget(null);
+                setDialogOpen(true);
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" /> Adicionar Orçamento
             </Button>
           </div>
@@ -115,10 +126,16 @@ const BudgetPage = () => {
 
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+            <div className="text-center py-8 text-muted-foreground">
+              Carregando...
+            </div>
           ) : !isMobile ? (
             <>
-              <BudgetTable budgets={currentBudgets} onEdit={handleEditBudget} onDelete={handleDelete} />
+              <BudgetTable
+                budgets={currentBudgets}
+                onEdit={handleEditBudget}
+                onDelete={handleDelete}
+              />
               {filteredBudgets.length > 0 && (
                 <BudgetPagination
                   currentPage={currentPage}
@@ -132,15 +149,14 @@ const BudgetPage = () => {
           ) : (
             <>
               <div className="space-y-4">
-             {currentBudgets.map((budget, index) => (
-  <BudgetCard
-    key={budget.Id ?? `budget-${index}`}
-    budget={budget}
-    onEdit={handleEditBudget}
-    onDelete={handleDelete}
-  />
-))}
-
+                {currentBudgets.map((budget, index) => (
+                  <BudgetCard
+                    key={budget.Id ?? `budget-${index}`}
+                    budget={budget}
+                    onEdit={handleEditBudget}
+                    onDelete={handleDelete}
+                  />
+                ))}
               </div>
               {filteredBudgets.length > 0 && (
                 <BudgetPagination
@@ -158,7 +174,10 @@ const BudgetPage = () => {
 
       <BudgetModal
         open={dialogOpen}
-        onClose={() => { setDialogOpen(false); setEditingBudget(null); }}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditingBudget(null);
+        }}
         onSubmit={handleSubmit}
         initialData={editingBudget}
       />

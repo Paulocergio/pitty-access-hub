@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,18 +11,35 @@ import {
 } from "@/components/ui/table";
 import { Edit, Trash2, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Budget } from "@/types/Budget/Budget";
+import { deleteBudgetItem } from "@/services/BudgetService";
 
 interface BudgetTableProps {
   budgets: Budget[];
-  onEdit: (budget: Budget) => void;
+  onEdit: (budget: Budget) => void; // ← abre modal com os dados preenchidos
   onDelete: (id: number) => void;
 }
 
 const BudgetTable = ({ budgets, onEdit, onDelete }: BudgetTableProps) => {
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [budgetList, setBudgetList] = useState<Budget[]>(budgets);
 
   const toggleExpand = (id: number) => {
     setExpandedRow(expandedRow === id ? null : id);
+  };
+
+  const handleDeleteItem = async (budgetId: number, itemId: number) => {
+    try {
+      await deleteBudgetItem(itemId);
+      setBudgetList((prevBudgets) =>
+        prevBudgets.map((b) =>
+          b.Id === budgetId
+            ? { ...b, Items: b.Items?.filter((item) => item.Id !== itemId) }
+            : b
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao excluir item:", error);
+    }
   };
 
   return (
@@ -39,9 +57,10 @@ const BudgetTable = ({ budgets, onEdit, onDelete }: BudgetTableProps) => {
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
-          {budgets.length > 0 ? (
-            budgets.map((budget) => (
+          {budgetList.length > 0 ? (
+            budgetList.map((budget) => (
               <>
                 {/* Linha principal */}
                 <TableRow
@@ -49,8 +68,9 @@ const BudgetTable = ({ budgets, onEdit, onDelete }: BudgetTableProps) => {
                   className="hover:bg-muted/30 cursor-pointer"
                   onClick={() => toggleExpand(budget.Id)}
                 >
-               <TableCell className="font-medium">{budget.BudgetNumber}</TableCell>
-
+                  <TableCell className="font-medium">
+                    {budget.BudgetNumber}
+                  </TableCell>
                   <TableCell>{budget.CustomerName}</TableCell>
                   <TableCell>{budget.Email}</TableCell>
                   <TableCell>{budget.Phone}</TableCell>
@@ -65,16 +85,18 @@ const BudgetTable = ({ budgets, onEdit, onDelete }: BudgetTableProps) => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      {/* 🔹 Ao clicar, abre o modal com dados preenchidos */}
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onEdit(budget);
+                          onEdit(budget); // <- aqui dispara o modal
                         }}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -86,6 +108,7 @@ const BudgetTable = ({ budgets, onEdit, onDelete }: BudgetTableProps) => {
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
@@ -104,46 +127,75 @@ const BudgetTable = ({ budgets, onEdit, onDelete }: BudgetTableProps) => {
                   </TableCell>
                 </TableRow>
 
-                {/* Linha expandida com itens */}
-                {expandedRow === budget.Id && (
-  <TableRow className="bg-gray-50">
-    <TableCell colSpan={8}>
-      <div className="p-3 border-t border-gray-200">
-        <h4 className="font-semibold mb-2 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-purple-600" />
-          Itens do Orçamento
-        </h4>
-        {budget.Items && budget.Items.length > 0 ? (
-          <Table className="border rounded-md">
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead>Descrição</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead>Valor Unitário</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {budget.Items.map((item) => (
-                <TableRow key={item.Id}>
-                  <TableCell>{item.Description}</TableCell>
-                  <TableCell>{item.Quantity}</TableCell>
-                  <TableCell>
-                    R$ {(Number(item.UnitPrice) || 0).toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <p className="text-sm text-gray-500">
-            Nenhum item cadastrado para este orçamento.
-          </p>
-        )}
-      </div>
-    </TableCell>
-  </TableRow>
-)}
+                {/* Linha expandida com animação */}
+                <AnimatePresence>
+                  {expandedRow === budget.Id && (
+                    <TableRow className="bg-gray-50">
+                      <TableCell colSpan={8} className="p-0">
+                        <motion.div
+                          key={`expand-${budget.Id}`}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                          className="overflow-hidden p-3 border-t border-gray-200"
+                        >
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-purple-600" />
+                            Itens do Orçamento
+                          </h4>
 
+                          {budget.Items && budget.Items.length > 0 ? (
+                            <Table className="border rounded-md">
+                              <TableHeader>
+                                <TableRow className="bg-muted/50">
+                                  <TableHead>Descrição</TableHead>
+                                  <TableHead>Quantidade</TableHead>
+                                  <TableHead>Valor Unitário</TableHead>
+                                  <TableHead className="text-right">
+                                    Excluir
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {budget.Items.map((item) => (
+                                  <TableRow key={item.Id}>
+                                    <TableCell>{item.Description}</TableCell>
+                                    <TableCell>{item.Quantity}</TableCell>
+                                    <TableCell>
+                                      R${" "}
+                                      {(Number(item.UnitPrice) || 0).toFixed(2)}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:bg-red-50"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteItem(
+                                            budget.Id,
+                                            item.Id
+                                          );
+                                        }}
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              Nenhum item cadastrado para este orçamento.
+                            </p>
+                          )}
+                        </motion.div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </AnimatePresence>
               </>
             ))
           ) : (

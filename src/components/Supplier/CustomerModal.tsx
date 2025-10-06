@@ -19,7 +19,7 @@ interface CustomerModalProps {
   initialData?: Customer | null;
 }
 
-const CustomerModal = ({ open, onClose, onSubmit, initialData }: CustomerModalProps) => {
+const SupplierModal = ({ open, onClose, onSubmit, initialData }: CustomerModalProps) => {
   const [formData, setFormData] = useState<Omit<Customer, "Id" | "CreatedAt" | "UpdatedAt">>({
     DocumentNumber: "",
     CompanyName: "",
