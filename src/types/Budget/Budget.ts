@@ -1,10 +1,11 @@
 export interface BudgetItem {
+
   Id?: number;
   BudgetId?: number;
   Description: string;
   Quantity: number;
   UnitPrice: number;
-  Total: number;
+  Total?: number;
 }
 
 export interface Budget {

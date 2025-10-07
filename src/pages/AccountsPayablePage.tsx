@@ -1,0 +1,189 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Search, Plus } from "lucide-react";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
+import { useToast } from "@/hooks/use-toast";
+
+import { AccountsPayable } from "@/types/AccountsPayable/AccountsPayable";
+import {
+  getAccountsPayables,
+  createAccountsPayable,
+  updateAccountsPayable,
+  deleteAccountsPayable,
+} from "@/services/AccountsPayableService";
+
+import AccountsPayableTable from "@/components/accountspayable/AccountsPayableTable";
+import AccountsPayablePagination from "@/components/accountspayable/AccountsPayablePagination";
+import AccountsPayableCard from "@/components/accountspayable/AccountsPayableCard";
+import AccountsPayableModal from "@/components/accountspayable/AccountsPayableModal";
+
+const AccountsPayablePage = () => {
+  const { toast } = useToast();
+  const [accounts, setAccounts] = useState<AccountsPayable[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingAccount, setEditingAccount] = useState<AccountsPayable | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const loadAccounts = async () => {
+    setLoading(true);
+    try {
+      const data = await getAccountsPayables();
+      setAccounts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao carregar contas a pagar", error);
+      setAccounts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAccounts();
+  }, []);
+
+  const filteredAccounts = accounts.filter(
+    (a) =>
+      (a.Description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (a.SupplierName || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredAccounts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentAccounts = filteredAccounts.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleEditAccount = (account: AccountsPayable) => {
+    setEditingAccount(account);
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (data: Omit<AccountsPayable, "Id" | "CreatedAt" | "UpdatedAt">) => {
+    try {
+      if (editingAccount) {
+        await updateAccountsPayable({ ...editingAccount, ...data });
+        toast({ title: "Conta atualizada com sucesso" });
+      } else {
+        await createAccountsPayable(data as Omit<AccountsPayable, "Id">);
+        toast({ title: "Conta criada com sucesso" });
+      }
+      await loadAccounts();
+      setDialogOpen(false);
+      setEditingAccount(null);
+    } catch (error) {
+      console.error("Erro ao salvar conta", error);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteAccountsPayable(id);
+      toast({ title: "Conta excluída com sucesso" });
+      await loadAccounts();
+    } catch (error) {
+      console.error("Erro ao excluir conta", error);
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar contas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button
+              onClick={() => {
+                setEditingAccount(null);
+                setDialogOpen(true);
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+          ) : !isMobile ? (
+            <>
+              <AccountsPayableTable
+                accounts={currentAccounts}
+                onEdit={handleEditAccount}
+                onDelete={handleDelete}
+              />
+              {filteredAccounts.length > 0 && (
+                <AccountsPayablePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  onPageChange={setCurrentPage}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <div className="space-y-4">
+                {currentAccounts.length > 0 ? (
+                  currentAccounts.map((account) => (
+                    <AccountsPayableCard
+                      key={account.Id}
+                      account={account}
+                      onEdit={handleEditAccount}
+                      onDelete={handleDelete}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nenhuma conta encontrada
+                  </div>
+                )}
+              </div>
+              {filteredAccounts.length > 0 && (
+                <AccountsPayablePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  onPageChange={setCurrentPage}
+                />
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <AccountsPayableModal
+        open={dialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditingAccount(null);
+        }}
+        onSubmit={handleSubmit}
+        initialData={editingAccount}
+      />
+    </DashboardLayout>
+  );
+};
+
+export default AccountsPayablePage;

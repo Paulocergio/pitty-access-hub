@@ -21,26 +21,7 @@ import {
   Package,
 } from "lucide-react";
 
-interface BudgetItem {
-  Description: string;
-  Quantity: number;
-  UnitPrice: number;
-}
-
-interface Budget {
-  Id?: string;
-  BudgetNumber?: string;
-  CustomerName: string;
-  Email: string;
-  Phone: string;
-  Address: string;
-  IssueDate: string;
-  DueDate: string;
-  Items: BudgetItem[];
-  Discount: number;
-  Tax: number;
-  Total: number;
-}
+import { Budget, BudgetItem } from "@/types/Budget/Budget";
 
 interface BudgetModalProps {
   open: boolean;
@@ -107,12 +88,13 @@ const BudgetModal = ({
     }
   }, [open, initialData]);
 
-  const handleAddItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      Items: [...prev.Items, { Description: "", Quantity: 1, UnitPrice: 0 }],
-    }));
-  };
+const handleAddItem = () => {
+  setFormData((prev) => ({
+    ...prev,
+    Items: [...prev.Items, { Description: "", Quantity: 1, UnitPrice: 0 }],
+  }));
+};
+
 
   const handleRemoveItem = (index: number) => {
     setFormData((prev) => ({

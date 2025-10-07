@@ -10,6 +10,9 @@ import Users from "./pages/Users";
 import SupplierPage from "./pages/Supplier";
 import CustomerPage from "./pages/Customer";
 import BudgetPage from "./pages/BudgetPage";
+import ProductPage from "./pages/ProductPage";
+import AccountsPayablePage from "./pages/AccountsPayablePage";
+import AccountsReceivablePage from "./pages/AccountsReceivablePage"; // ✅ nova importação
 
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -25,6 +28,7 @@ const App = () => (
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
           <Route
             path="/dashboard"
             element={
@@ -33,6 +37,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/usuarios"
             element={
@@ -60,11 +65,40 @@ const App = () => (
             }
           />
 
-           <Route
+          <Route
             path="/orcamento"
             element={
               <ProtectedRoute>
                 <BudgetPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/produto"
+            element={
+              <ProtectedRoute>
+                <ProductPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ✅ Contas a Pagar */}
+          <Route
+            path="/contas-a-pagar"
+            element={
+              <ProtectedRoute>
+                <AccountsPayablePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ✅ Contas a Receber */}
+          <Route
+            path="/contas-a-receber"
+            element={
+              <ProtectedRoute>
+                <AccountsReceivablePage />
               </ProtectedRoute>
             }
           />

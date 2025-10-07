@@ -21,7 +21,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Home
+  Home,
+  CreditCard,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,7 +31,10 @@ const mainItems = [
   { title: "Usuários", url: "/usuarios", icon: Users },
   { title: "Clientes", url: "/clientes", icon: Building2 },
   { title: "Fornecedores", url: "/fornecedores", icon: Truck },
-   { title: "Orcamento", url: "/orcamento", icon: Truck },
+  { title: "Orçamento", url: "/orcamento", icon: DollarSign },
+  { title: "Produtos", url: "/produto", icon: Package },
+  { title: "Contas a Pagar", url: "/contas-a-pagar", icon: CreditCard },
+  { title: "Contas a Receber", url: "/contas-a-receber", icon: DollarSign }, // ✅ novo item
 ];
 
 const systemItems = [
@@ -72,9 +76,7 @@ export function AppSidebar() {
               <h2 className="font-bold text-lg text-sidebar-foreground truncate">
                 Pitty
               </h2>
-              <p className="text-xs text-muted-foreground truncate">
-
-              </p>
+              <p className="text-xs text-muted-foreground truncate"></p>
             </div>
           )}
         </div>
@@ -97,7 +99,9 @@ export function AppSidebar() {
                       className={`${isActive(item.url) ? "active" : ""}`}
                     >
                       <item.icon className="w-4 h-4 flex-shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.title}</span>}
+                      {!isCollapsed && (
+                        <span className="truncate">{item.title}</span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,7 +121,9 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild className="sidebar-item">
                     <NavLink to={item.url}>
                       <item.icon className="w-4 h-4 flex-shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.title}</span>}
+                      {!isCollapsed && (
+                        <span className="truncate">{item.title}</span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
