@@ -34,20 +34,20 @@ const ProductTable = ({ products, onEdit, onDelete }: ProductTableProps) => {
         <TableBody>
           {products.length > 0 ? (
             products.map((product) => (
-              <TableRow key={product.Id} className="hover:bg-muted/30">
-                <TableCell className="font-medium">{product.Name}</TableCell>
-                <TableCell>{product.Category}</TableCell>
-                <TableCell>{product.Price?.toFixed(2)}</TableCell>
-                <TableCell>{product.StockQuantity}</TableCell>
+              <TableRow key={product.id} className="hover:bg-muted/30">
+                <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell>{product.category}</TableCell>
+                <TableCell>{product.saleprice.toFixed(2)}</TableCell>
+                <TableCell>{product.stockquantity}</TableCell>
                 <TableCell>
                   <Badge
                     className={
-                      product.Status?.toUpperCase() === "ATIVO"
+                      product.status?.toUpperCase() === "ATIVO"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
                     }
                   >
-                    {product.Status || "Desconhecido"}
+                    {product.status || "Desconhecido"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -58,7 +58,7 @@ const ProductTable = ({ products, onEdit, onDelete }: ProductTableProps) => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDelete(product.Id)}
+                      onClick={() => onDelete(product.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="w-4 h-4" />

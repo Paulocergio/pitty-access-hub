@@ -41,7 +41,8 @@ const mapToBack = (s: Supplier | Omit<Supplier, "Id">) => ({
 
 export const getSuppliers = async (): Promise<Supplier[]> => {
   const { data } = await axios.get(API_URL);
-  const fornecedores = Array.isArray(data?.dados) ? data.dados : [];
+const fornecedores = Array.isArray(data) ? data : [];
+
   return fornecedores.map(mapToFront);
 };
 

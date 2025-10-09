@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Package } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { Product } from "@/types/Product/Product";
 
 interface ProductCardProps {
@@ -10,50 +10,42 @@ interface ProductCardProps {
   onDelete: (id: number) => void;
 }
 
-const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => (
-  <Card className="hover:shadow-md transition-shadow">
-    <CardHeader className="pb-3">
-      <div className="flex items-center justify-between">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Package className="w-4 h-4" />
-          {product.Name}
-        </CardTitle>
+const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-medium">{product.name}</CardTitle>
         <Badge
           className={
-            product.Status?.toUpperCase() === "ATIVO"
+            product.status?.toUpperCase() === "ATIVO"
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }
         >
-          {product.Status || "Desconhecido"}
+          {product.status}
         </Badge>
-      </div>
-    </CardHeader>
-    <CardContent className="space-y-3 text-sm text-muted-foreground">
-      <p>
-        <strong>Categoria:</strong> {product.Category}
-      </p>
-      <p>
-        <strong>Preço:</strong> R$ {product.Price?.toFixed(2)}
-      </p>
-      <p>
-        <strong>Estoque:</strong> {product.StockQuantity} unidades
-      </p>
-      <div className="flex justify-end gap-2 pt-2 border-t">
-        <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
-          <Edit className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onDelete(product.Id)}
-          className="text-destructive"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-);
+      </CardHeader>
+
+      <CardContent className="space-y-1 text-sm text-muted-foreground">
+        <p>Categoria: <span className="text-foreground">{product.category || "-"}</span></p>
+        <p>Preço: <span className="text-foreground">R$ {product.saleprice.toFixed(2)}</span></p>
+        <p>Estoque: <span className="text-foreground">{product.stockquantity}</span></p>
+        <div className="flex gap-2 pt-3">
+          <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive"
+            onClick={() => onDelete(product.id)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default ProductCard;

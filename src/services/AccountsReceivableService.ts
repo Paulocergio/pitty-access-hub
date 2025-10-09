@@ -3,23 +3,23 @@ import { AccountsReceivable } from "@/types/AccountsReceivable/AccountsReceivabl
 
 const API_URL = "https://localhost:7274/api/AccountsReceivable";
 
-export const getAccountsReceivables = async (): Promise<AccountsReceivable[]> => {
+export async function getAccountsReceivables(): Promise<AccountsReceivable[]> {
   const response = await axios.get(API_URL);
   return response.data;
-};
+}
 
-export const createAccountsReceivable = async (
-  data: Omit<AccountsReceivable, "Id" | "CreatedAt" | "UpdatedAt">
-): Promise<void> => {
+export async function createAccountsReceivable(
+  data: Omit<AccountsReceivable, "Id">
+): Promise<void> {
   await axios.post(API_URL, data);
-};
+}
 
-export const updateAccountsReceivable = async (
+export async function updateAccountsReceivable(
   data: AccountsReceivable
-): Promise<void> => {
+): Promise<void> {
   await axios.put(`${API_URL}/${data.Id}`, data);
-};
+}
 
-export const deleteAccountsReceivable = async (id: number): Promise<void> => {
+export async function deleteAccountsReceivable(id: number): Promise<void> {
   await axios.delete(`${API_URL}/${id}`);
-};
+}

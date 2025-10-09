@@ -8,9 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 
 import { Product } from "@/types/Product/Product";
 import {
-  getProducts,
   createProduct,
   updateProduct,
+  getProducts,
   deleteProduct,
 } from "@/services/ProductService";
 
@@ -55,8 +55,8 @@ const ProductPage = () => {
 
   const filteredProducts = products.filter(
     (p) =>
-      (p.Name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.Category || "").toLowerCase().includes(searchTerm.toLowerCase())
+      (p.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.category || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -72,21 +72,26 @@ const ProductPage = () => {
   };
 
   const handleSubmit = async (
-    data: Omit<Product, "Id" | "CreatedAt" | "UpdatedAt">
+    formData: Omit<Product, "id" | "createdat" | "updatedat">
   ) => {
     try {
       if (editingProduct) {
-        await updateProduct({ ...editingProduct, ...data });
-        toast({ title: "Produto atualizado com sucesso" });
+        await updateProduct(editingProduct.id, formData);
+        toast({ title: "Produto atualizado com sucesso!" });
       } else {
-        await createProduct(data as Omit<Product, "Id">);
-        toast({ title: "Produto criado com sucesso" });
+        await createProduct(formData);
+        toast({ title: "Produto criado com sucesso!" });
       }
+
       await loadProducts();
       setDialogOpen(false);
       setEditingProduct(null);
-    } catch (error) {
-      console.error("Erro ao salvar produto", error);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao salvar produto",
+        description: error.response?.data?.message || "Erro desconhecido",
+      });
     }
   };
 
@@ -154,7 +159,7 @@ const ProductPage = () => {
                 {currentProducts.length > 0 ? (
                   currentProducts.map((product) => (
                     <ProductCard
-                      key={product.Id}
+                      key={product.id}
                       product={product}
                       onEdit={handleEditProduct}
                       onDelete={handleDelete}
