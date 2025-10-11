@@ -20,7 +20,7 @@ const AccountsPayableCard = ({ account, onEdit, onDelete }: AccountsPayableCardP
         </CardTitle>
         <Badge
           className={
-            account.Status?.toUpperCase() === "PAGO"
+            account.Status?.toUpperCase() === "PAGA"
               ? "bg-green-100 text-green-800"
               : "bg-yellow-100 text-yellow-800"
           }

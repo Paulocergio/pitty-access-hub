@@ -1,13 +1,12 @@
-// src/types/AccountsPayable/AccountsPayable.ts
-
 export interface AccountsPayable {
   Id: number;
-  Description: string;           // Descrição da conta (ex: “Fatura de energia”)
-  SupplierName: string;          // Nome do fornecedor
-  DueDate: string;               // Data de vencimento (YYYY-MM-DD)
-  PaymentDate?: string | null;   // Data em que foi paga
-  Amount: number;                // Valor da conta
-  Status: string;                // “PENDENTE”, “PAGO”, “ATRASADO”
+  SupplierName: string;
+  Description: string;
+  Amount: number;
+  DueDate: string;
+  PaymentDate?: string | null; // ✅ novo
+  Status: string; // “PENDENTE” | “PAGO”
+  IsOverdue?: boolean; // ✅ novo
   CreatedAt?: string;
   UpdatedAt?: string;
 }

@@ -118,7 +118,7 @@ const AccountsPayableModal = ({ open, onClose, onSubmit, initialData }: Accounts
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="PENDENTE">Pendente</SelectItem>
-                <SelectItem value="PAGO">Pago</SelectItem>
+                <SelectItem value="PAGA">Paga</SelectItem>
               </SelectContent>
             </Select>
           </div>
