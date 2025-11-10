@@ -18,27 +18,32 @@ import {
   Package,
   DollarSign,
   Truck,
-  BarChart3,
   Settings,
   LogOut,
-  Home,
   CreditCard,
+  Receipt,
+  LayoutDashboard,
+  UserCircle,
+  Building,
+  ShoppingBag,
+  FileText,
+  TrendingUp,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const mainItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Usuários", url: "/usuarios", icon: Users },
-  { title: "Clientes", url: "/clientes", icon: Building2 },
-  { title: "Fornecedores", url: "/fornecedores", icon: Truck },
-  { title: "Orçamento", url: "/orcamento", icon: DollarSign },
-  { title: "Produtos", url: "/produto", icon: Package },
-  { title: "Contas a Pagar", url: "/contas-a-pagar", icon: CreditCard },
-  { title: "Contas a Receber", url: "/contas-a-receber", icon: DollarSign }, // ✅ novo item
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, color: "text-blue-500" },
+  { title: "Usuários", url: "/usuarios", icon: UserCircle, color: "text-purple-500" },
+  { title: "Clientes", url: "/clientes", icon: Building, color: "text-green-500" },
+  { title: "Fornecedores", url: "/fornecedores", icon: Truck, color: "text-orange-500" },
+  { title: "Orçamento", url: "/orcamento", icon: FileText, color: "text-cyan-500" },
+  { title: "Produtos", url: "/produto", icon: ShoppingBag, color: "text-pink-500" },
+  { title: "Contas a Pagar", url: "/contas-a-pagar", icon: CreditCard, color: "text-red-500" },
+  { title: "Contas a Receber", url: "/contas-a-receber", icon: TrendingUp, color: "text-emerald-500" },
 ];
 
 const systemItems = [
-  { title: "Configurações", url: "/configuracoes", icon: Settings },
+  { title: "Configurações", url: "/configuracoes", icon: Settings, color: "text-gray-500" },
 ];
 
 export function AppSidebar() {
@@ -63,12 +68,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${isCollapsed ? "w-16" : "w-64"} border-r bg-sidebar transition-all duration-300`}
+      className="border-r bg-gradient-to-b from-sidebar to-sidebar/95 transition-all duration-300"
       collapsible="icon"
     >
       <SidebarContent className="p-4">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+        {/* Logo Section */}
+        <div className={`flex items-center mb-8 transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
             <Building2 className="w-6 h-6 text-primary-foreground" />
           </div>
           {!isCollapsed && (
@@ -76,15 +82,18 @@ export function AppSidebar() {
               <h2 className="font-bold text-lg text-sidebar-foreground truncate">
                 Pitty
               </h2>
-              <p className="text-xs text-muted-foreground truncate"></p>
+              <p className="text-xs text-muted-foreground truncate">Sistema de Gestão</p>
             </div>
           )}
         </div>
 
+        {/* Main Menu */}
         <SidebarGroup>
-          <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-            Principal
-          </SidebarGroupLabel>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground mb-2">
+              PRINCIPAL
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {mainItems.map((item) => (
@@ -92,13 +101,20 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    className="sidebar-item"
+                    className={`group relative overflow-hidden transition-all duration-200 ${
+                      isActive(item.url)
+                        ? 'bg-primary/10 text-primary font-medium shadow-sm'
+                        : 'hover:bg-sidebar-accent/50'
+                    } ${isCollapsed ? 'justify-center' : ''}`}
+                    tooltip={isCollapsed ? item.title : undefined}
                   >
                     <NavLink
                       to={item.url}
-                      className={`${isActive(item.url) ? "active" : ""}`}
+                      className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}
                     >
-                      <item.icon className="w-4 h-4 flex-shrink-0" />
+                      <item.icon className={`w-5 h-5 flex-shrink-0 transition-colors ${
+                        isActive(item.url) ? 'text-primary' : item.color
+                      }`} />
                       {!isCollapsed && (
                         <span className="truncate">{item.title}</span>
                       )}
@@ -110,17 +126,24 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-            Sistema
-          </SidebarGroupLabel>
+        {/* System Menu */}
+        <SidebarGroup className="mt-6">
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground mb-2">
+              SISTEMA
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {systemItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="sidebar-item">
-                    <NavLink to={item.url}>
-                      <item.icon className="w-4 h-4 flex-shrink-0" />
+                  <SidebarMenuButton
+                    asChild
+                    className={`group hover:bg-sidebar-accent/50 transition-all duration-200 ${isCollapsed ? 'justify-center' : ''}`}
+                    tooltip={isCollapsed ? item.title : undefined}
+                  >
+                    <NavLink to={item.url} className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
+                      <item.icon className={`w-5 h-5 flex-shrink-0 ${item.color}`} />
                       {!isCollapsed && (
                         <span className="truncate">{item.title}</span>
                       )}
@@ -132,14 +155,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <div className="mt-auto pt-4">
+        {/* Logout Button */}
+        <div className="mt-auto pt-4 border-t border-sidebar-border">
           <Button
             variant="ghost"
             onClick={handleLogout}
-            className="sidebar-item w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+            className={`w-full transition-all duration-200 text-destructive hover:text-destructive hover:bg-destructive/10 group ${
+              isCollapsed ? 'justify-center px-2' : 'justify-start'
+            }`}
+            title={isCollapsed ? "Sair" : undefined}
           >
-            <LogOut className="w-4 h-4 flex-shrink-0" />
-            {!isCollapsed && <span className="truncate">Sair</span>}
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && <span className="truncate ml-3">Sair</span>}
           </Button>
         </div>
       </SidebarContent>
