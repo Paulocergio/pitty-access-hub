@@ -1,9 +1,9 @@
-import axios from "axios";
+import { api } from "./api";
 import { Supplier } from "@/types/Supplier/Supplier";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/Supplier`;
+const URL = "/Supplier";
 
-const mapToFront = (s: any): Supplier => ({
+const toFront = (s: any): Supplier => ({
   Id: s.id,
   DocumentNumber: s.documentNumber,
   CompanyName: s.companyName,
@@ -21,7 +21,7 @@ const mapToFront = (s: any): Supplier => ({
   UpdatedAt: s.updatedAt,
 });
 
-const mapToBack = (s: Supplier | Omit<Supplier, "Id">) => ({
+const toBack = (s: Supplier | Omit<Supplier,"Id">) => ({
   id: "Id" in s ? s.Id : undefined,
   documentNumber: s.DocumentNumber,
   companyName: s.CompanyName,
@@ -39,25 +39,19 @@ const mapToBack = (s: Supplier | Omit<Supplier, "Id">) => ({
   updatedAt: "UpdatedAt" in s ? s.UpdatedAt : undefined,
 });
 
-export const getSuppliers = async (): Promise<Supplier[]> => {
-  const { data } = await axios.get(API_URL);
-const fornecedores = Array.isArray(data) ? data : [];
-
-  return fornecedores.map(mapToFront);
-};
-
-export const createSupplier = async (supplier: Omit<Supplier, "Id">) => {
-  const payload = mapToBack(supplier);
-  const { data } = await axios.post(API_URL, payload);
-  return mapToFront(data.dados);
-};
-
-export const updateSupplier = async (supplier: Supplier) => {
-  const payload = mapToBack(supplier);
-  const { data } = await axios.put(`${API_URL}/${supplier.Id}`, payload);
-  return mapToFront(data.dados);
-};
-
-export const deleteSupplier = async (id: number) => {
-  await axios.delete(`${API_URL}/${id}`);
-};
+export async function getSuppliers(): Promise<Supplier[]>{
+  const { data } = await api.get(URL);
+  const rows = Array.isArray(data?.dados) ? data.dados : Array.isArray(data) ? data : [];
+  return rows.map(toFront);
+}
+export async function createSupplier(supplier: Omit<Supplier,"Id">){
+  const { data } = await api.post(URL, toBack(supplier));
+  return toFront(data.dados ?? data);
+}
+export async function updateSupplier(supplier: Supplier){
+  const { data } = await api.put(`${URL}/${supplier.Id}`, toBack(supplier));
+  return toFront(data.dados ?? data);
+}
+export async function deleteSupplier(id: number){
+  await api.delete(`${URL}/${id}`);
+}

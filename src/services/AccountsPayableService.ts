@@ -1,51 +1,38 @@
-import axios from "axios";
+import { api } from "./api";
 import { AccountsPayable } from "@/types/AccountsPayable/AccountsPayable";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/AccountsPayable`;
+const URL = "/AccountsPayable";
 
-// Mapeia do backend → frontend
 const mapToFront = (a: any): AccountsPayable => ({
   Id: a.id,
   SupplierName: a.supplier,
   Description: a.description,
   Amount: a.amount,
   DueDate: a.dueDate,
-  PaymentDate: a.paymentDate,     // ✅ novo
+  PaymentDate: a.paymentDate,
   Status: a.status === 1 ? "PAGO" : "PENDENTE",
-  IsOverdue: a.isOverdue,         // ✅ novo
+  IsOverdue: a.isOverdue,
 });
 
-// Mapeia do frontend → backend
 const mapToBack = (a: AccountsPayable | Omit<AccountsPayable, "Id">) => ({
   id: "Id" in a ? a.Id : undefined,
   supplier: a.SupplierName,
   description: a.Description,
   amount: a.Amount,
-  // 🔹 Garante que o formato seja "YYYY-MM-DDTHH:mm:ss.sssZ" (UTC)
   dueDate: a.DueDate ? new Date(a.DueDate).toISOString() : null,
-  status: a.Status === "PAGA" ? 1 : 0,
+  status: a.Status === "PAGO" ? 1 : 0, // <- você estava usando "PAGA"
 });
 
-
-// 🔹 Buscar todas as contas
-export const getAccountsPayables = async (): Promise<AccountsPayable[]> => {
-  const response = await axios.get(API_URL);
-  return response.data.map(mapToFront);
-};
-
-// 🔹 Criar nova conta
-export const createAccountsPayable = async (
-  data: Omit<AccountsPayable, "Id" | "CreatedAt" | "UpdatedAt">
-): Promise<void> => {
-  await axios.post(API_URL, mapToBack(data));
-};
-
-// 🔹 Atualizar conta
-export const updateAccountsPayable = async (data: AccountsPayable): Promise<void> => {
-  await axios.put(`${API_URL}/${data.Id}`, mapToBack(data));
-};
-
-// 🔹 Excluir conta
-export const deleteAccountsPayable = async (id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
-};
+export async function getAccountsPayables(): Promise<AccountsPayable[]> {
+  const { data } = await api.get(URL);
+  return Array.isArray(data) ? data.map(mapToFront) : [];
+}
+export async function createAccountsPayable(data: Omit<AccountsPayable,"Id"|"CreatedAt"|"UpdatedAt">): Promise<void> {
+  await api.post(URL, mapToBack(data));
+}
+export async function updateAccountsPayable(data: AccountsPayable): Promise<void> {
+  await api.put(`${URL}/${data.Id}`, mapToBack(data));
+}
+export async function deleteAccountsPayable(id: number): Promise<void> {
+  await api.delete(`${URL}/${id}`);
+}

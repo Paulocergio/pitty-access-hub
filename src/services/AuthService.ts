@@ -1,8 +1,5 @@
-import axios from "axios";
-
-const BASE = (import.meta.env.VITE_API_URL as string).replace(/\/+$/, "");
-
-const API_URL = `${BASE}/User/login`;
+// src/services/authService.ts
+import { api } from "./api";
 
 export interface LoginResponse {
   name: string;
@@ -10,12 +7,8 @@ export interface LoginResponse {
   token: string;
 }
 
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
-
-  if (import.meta.env.DEV) console.log("[AuthService] POST", API_URL);
-
-  const response = await axios.post<LoginResponse>(API_URL, { email, password }, {
-
-  });
-  return response.data;
-};
+export async function login(email: string, password: string): Promise<LoginResponse> {
+  const { data } = await api.post<LoginResponse>("/User/login", { email, password });
+  localStorage.setItem("token", data.token);
+  return data;
+}

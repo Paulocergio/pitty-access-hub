@@ -1,25 +1,18 @@
-import axios from "axios";
+import { api } from "./api";
 import { AccountsReceivable } from "@/types/AccountsReceivable/AccountsReceivable";
 
-const API_URL = "https://localhost:7274/api/AccountsReceivable";
+const URL = "/AccountsReceivable";
 
 export async function getAccountsReceivables(): Promise<AccountsReceivable[]> {
-  const response = await axios.get(API_URL);
-  return response.data;
+  const { data } = await api.get(URL);
+  return data;
 }
-
-export async function createAccountsReceivable(
-  data: Omit<AccountsReceivable, "Id">
-): Promise<void> {
-  await axios.post(API_URL, data);
+export async function createAccountsReceivable(data: Omit<AccountsReceivable,"Id">): Promise<void> {
+  await api.post(URL, data);
 }
-
-export async function updateAccountsReceivable(
-  data: AccountsReceivable
-): Promise<void> {
-  await axios.put(`${API_URL}/${data.Id}`, data);
+export async function updateAccountsReceivable(data: AccountsReceivable): Promise<void> {
+  await api.put(`${URL}/${data.Id}`, data);
 }
-
 export async function deleteAccountsReceivable(id: number): Promise<void> {
-  await axios.delete(`${API_URL}/${id}`);
+  await api.delete(`${URL}/${id}`);
 }

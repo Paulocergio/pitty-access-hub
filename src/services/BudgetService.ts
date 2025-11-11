@@ -1,11 +1,10 @@
-import axios from "axios";
+import { api } from "./api";
 import { Budget } from "@/types/Budget/Budget";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/Budget`;
+const URL = "/Budget";
 
-export const getBudgets = async (): Promise<Budget[]> => {
-  const { data } = await axios.get(API_URL);
-
+export async function getBudgets(): Promise<Budget[]> {
+  const { data } = await api.get(URL);
   return data.map((b: any) => ({
     Id: b.id,
     BudgetNumber: b.budgetNumber,
@@ -19,34 +18,23 @@ export const getBudgets = async (): Promise<Budget[]> => {
     Total: b.total,
     CreatedAt: b.createdAt,
     UpdatedAt: b.updatedAt,
-    Items: b.items?.map((i: any) => ({
+    Items: (b.items ?? []).map((i: any) => ({
       Id: i.id,
       BudgetId: i.budgetId,
       Description: i.description,
       Quantity: i.quantity,
       UnitPrice: i.unitPrice,
       Total: i.total,
-    })) || []
+    })),
   }));
-};
-
-export const createBudget = async (budget: Omit<Budget, "Id">) => {
-  const { data } = await axios.post(API_URL, budget);
+}
+export async function createBudget(budget: Omit<Budget,"Id">) {
+  const { data } = await api.post(URL, budget);
   return data;
-};
-
-export const updateBudget = async (budget: Budget) => {
-  const { data } = await axios.put(`${API_URL}/${budget.Id}`, budget);
+}
+export async function updateBudget(budget: Budget) {
+  const { data } = await api.put(`${URL}/${budget.Id}`, budget);
   return data;
-};
-
-
-
-
-export const deleteBudget = async (id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
-};
-
-export const deleteBudgetItem = async (itemId: number): Promise<void> => {
-  await axios.delete(`${API_URL}/item/${itemId}`);
-};
+}
+export async function deleteBudget(id: number){ await api.delete(`${URL}/${id}`); }
+export async function deleteBudgetItem(itemId: number){ await api.delete(`${URL}/item/${itemId}`); }

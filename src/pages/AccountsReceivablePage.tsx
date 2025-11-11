@@ -14,10 +14,10 @@ import {
   deleteAccountsReceivable,
 } from "@/services/AccountsReceivableService";
 
-import AccountsReceivableTable from "@/components/accountsreceivable/AccountsReceivableTable";
-import AccountsReceivablePagination from "@/components/accountsreceivable/AccountsReceivablePagination";
-import AccountsReceivableCard from "@/components/accountsreceivable/AccountsReceivableCard";
-import AccountsReceivableModal from "@/components/accountsreceivable/AccountsReceivableModal";
+import AccountsReceivableTable from "@/components/accountsReceivable/AccountsReceivableTable";
+import AccountsReceivablePagination from "@/components/accountsReceivable/AccountsReceivablePagination";
+import AccountsReceivableCard from "@/components/accountsReceivable/AccountsReceivableCard";
+import AccountsReceivableModal from "@/components/accountsReceivable/AccountsReceivableModal";
 
 const AccountsReceivablePage = () => {
   const { toast } = useToast();
