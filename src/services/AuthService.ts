@@ -1,4 +1,4 @@
-// src/services/authService.ts
+
 import { api } from "./api";
 
 export interface LoginResponse {
@@ -12,3 +12,14 @@ export async function login(email: string, password: string): Promise<LoginRespo
   localStorage.setItem("token", data.token);
   return data;
 }
+export type RegisterRequest = {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+};
+
+export const register = async (payload: RegisterRequest) => {
+  const { data } = await api.post("/auth/register", payload);
+  return data;
+};

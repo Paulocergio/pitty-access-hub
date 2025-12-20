@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
+import Register from "./pages/Register"; // ✅ NOVO
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import SupplierPage from "./pages/Supplier";
@@ -12,8 +13,7 @@ import CustomerPage from "./pages/Customer";
 import BudgetPage from "./pages/BudgetPage";
 import ProductPage from "./pages/ProductPage";
 import AccountsPayablePage from "./pages/AccountsPayablePage";
-import AccountsReceivablePage from "./pages/AccountsReceivablePage"; // ✅ nova importação
-
+import AccountsReceivablePage from "./pages/AccountsReceivablePage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -27,6 +27,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/criar-conta" element={<Register />} /> {/* ✅ NOVO */}
+
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           <Route
@@ -83,7 +85,6 @@ const App = () => (
             }
           />
 
-          {/* ✅ Contas a Pagar */}
           <Route
             path="/contas-a-pagar"
             element={
@@ -93,7 +94,6 @@ const App = () => (
             }
           />
 
-          {/* ✅ Contas a Receber */}
           <Route
             path="/contas-a-receber"
             element={
@@ -103,7 +103,6 @@ const App = () => (
             }
           />
 
-          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
