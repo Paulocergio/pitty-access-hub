@@ -1,28 +1,23 @@
 import { api } from "./api";
-import { AccountsPayable } from "@/types/AccountsPayable/AccountsPayable";
+import { AccountsPayable, AccountsPayableStatus } from "@/types/AccountsPayable/AccountsPayable";
 
 const URL = "/api/AccountsPayable";
 
-type FrontStatus = "PENDENTE" | "PAGA" | "ATRASADA" | "PAGA_COM_ATRASO";
-
-const statusToFront = (s: number): FrontStatus => {
+const statusToFront = (s: number): AccountsPayableStatus => {
   switch (s) {
-    case 1: return "PAGA";
+    case 1: return "PAGO";
     case 2: return "ATRASADA";
-    case 3: return "PAGA_COM_ATRASO";
     default: return "PENDENTE";
   }
 };
 
-const statusToBack = (s: FrontStatus): number => {
-  // O backend calcula Overdue/PaidLate, então aqui só faz sentido mandar 0 ou 1.
-  // Se vier ATRASADA/PAGA_COM_ATRASO (ex.: edit de registro antigo), mantém coerência:
-  return s === "PAGA" || s === "PAGA_COM_ATRASO" ? 1 : 0;
+const statusToBack = (s: AccountsPayableStatus): number => {
+  return s === "PAGO" ? 1 : 0;
 };
+
 
 const toIsoOrNull = (v?: string | null) => {
   if (!v) return null;
-  // aceita "YYYY-MM-DD" e transforma em ISO
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 };
@@ -32,29 +27,30 @@ const mapToFront = (a: any): AccountsPayable => ({
   SupplierName: a.supplier,
   Description: a.description,
   Amount: a.amount,
-  DueDate: a.dueDate,                 // pode ser ISO; seu input type="date" deve fazer slice(0,10) no modal
-  PaymentDate: a.paymentDate ?? null, // novo
+  DueDate: a.dueDate,
+  PaymentDate: a.paymentDate ?? null,
   Status: statusToFront(Number(a.status)),
   IsOverdue: Boolean(a.isOverdue),
+  CreatedAt: a.createdAt,
+  UpdatedAt: a.updatedAt,
 });
 
 const mapToBack = (a: AccountsPayable | Omit<AccountsPayable, "Id">) => {
-  const status = a.Status as FrontStatus;
-
-  const wantsPaid = status === "PAGA" || status === "PAGA_COM_ATRASO";
+  const wantsPaid = a.Status === "PAGA";
 
   return {
     supplier: a.SupplierName,
     description: a.Description,
     amount: a.Amount,
-    dueDate: toIsoOrNull(a.DueDate), // obrigatório no backend, mas mantenho null-safe
-    status: statusToBack(status),
+    dueDate: toIsoOrNull(a.DueDate),
 
-    // Se marcou como paga, manda PaymentDate (se não mandar, seu backend pode assumir UtcNow,
-    // mas se você ativou validação exigindo PaymentDate, então mande sempre).
-    paymentDate: wantsPaid ? toIsoOrNull((a as any).PaymentDate) : null,
+    // manda só 0/1
+    status: statusToBack(a.Status),
 
-    // IsOverdue o backend recalcula; pode mandar false para não “poluir”
+    // paga => exige PaymentDate
+    paymentDate: wantsPaid ? toIsoOrNull(a.PaymentDate ?? null) : null,
+
+    // backend recalcula
     isOverdue: false,
   };
 };

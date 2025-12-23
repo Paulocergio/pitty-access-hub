@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { AccountsPayable } from "@/types/AccountsPayable/AccountsPayable";
+import { AccountsPayable, AccountsPayableStatus } from "@/types/AccountsPayable/AccountsPayable";
 
 interface AccountsPayableModalProps {
   open: boolean;
@@ -25,6 +25,11 @@ interface AccountsPayableModalProps {
   initialData?: AccountsPayable | null;
 }
 
+const toDateInputValue = (value?: string | null) => {
+  if (!value) return "";
+  return value.length >= 10 ? value.slice(0, 10) : value;
+};
+
 const AccountsPayableModal = ({ open, onClose, onSubmit, initialData }: AccountsPayableModalProps) => {
   const [formData, setFormData] = useState<Omit<AccountsPayable, "Id" | "CreatedAt" | "UpdatedAt">>({
     SupplierName: "",
@@ -32,12 +37,20 @@ const AccountsPayableModal = ({ open, onClose, onSubmit, initialData }: Accounts
     Amount: 0,
     DueDate: "",
     Status: "PENDENTE",
+    PaymentDate: null,
+    IsOverdue: false,
   });
 
   useEffect(() => {
     if (initialData) {
       const { Id, CreatedAt, UpdatedAt, ...rest } = initialData;
-      setFormData(rest);
+      setFormData({
+        ...rest,
+        DueDate: toDateInputValue(rest.DueDate),
+        PaymentDate: toDateInputValue(rest.PaymentDate ?? null),
+        Status: rest.Status as AccountsPayableStatus,
+        IsOverdue: Boolean(rest.IsOverdue),
+      });
     } else {
       setFormData({
         SupplierName: "",
@@ -45,17 +58,33 @@ const AccountsPayableModal = ({ open, onClose, onSubmit, initialData }: Accounts
         Amount: 0,
         DueDate: "",
         Status: "PENDENTE",
+        PaymentDate: null,
+        IsOverdue: false,
       });
     }
   }, [initialData, open]);
 
+  const isPaidSelected = useMemo(() => formData.Status === "PAGA", [formData.Status]);
+
   const handleSubmit = async () => {
-    if (!formData.SupplierName || !formData.Amount) return;
-    await onSubmit(formData);
+    if (!formData.SupplierName?.trim()) return;
+    if (!formData.Amount || formData.Amount <= 0) return;
+    if (!formData.DueDate) return;
+
+    // Se marcou como paga, exige data de pagamento
+    if (isPaidSelected && !formData.PaymentDate) return;
+
+    const payload = {
+      ...formData,
+      PaymentDate: isPaidSelected ? formData.PaymentDate : null,
+      IsOverdue: false, // backend recalcula
+    };
+
+    await onSubmit(payload);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
@@ -92,16 +121,17 @@ const AccountsPayableModal = ({ open, onClose, onSubmit, initialData }: Accounts
                 type="number"
                 step="0.01"
                 placeholder="0.00"
-                value={formData.Amount}
-                onChange={(e) => setFormData({ ...formData, Amount: parseFloat(e.target.value) })}
+                value={Number.isFinite(formData.Amount) ? formData.Amount : 0}
+                onChange={(e) => setFormData({ ...formData, Amount: Number(e.target.value) })}
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="DueDate">Vencimento *</Label>
               <Input
                 id="DueDate"
                 type="date"
-                value={formData.DueDate}
+                value={toDateInputValue(formData.DueDate)}
                 onChange={(e) => setFormData({ ...formData, DueDate: e.target.value })}
               />
             </div>
@@ -111,26 +141,46 @@ const AccountsPayableModal = ({ open, onClose, onSubmit, initialData }: Accounts
             <Label>Status</Label>
             <Select
               value={formData.Status}
-              onValueChange={(val) => setFormData({ ...formData, Status: val })}
+              onValueChange={(val) => {
+                const next = val as AccountsPayableStatus;
+                setFormData({
+                  ...formData,
+                  Status: next,
+                  PaymentDate: next === "PAGA" ? (formData.PaymentDate ?? "") : null,
+                });
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
+
               <SelectContent>
                 <SelectItem value="PENDENTE">Pendente</SelectItem>
                 <SelectItem value="PAGA">Paga</SelectItem>
               </SelectContent>
             </Select>
+
+            {initialData && initialData.Status === "ATRASADA" && (
+              <p className="text-sm text-muted-foreground">Status atual: Atrasada</p>
+            )}
           </div>
+
+          {isPaidSelected && (
+            <div className="space-y-2">
+              <Label htmlFor="PaymentDate">Data de pagamento *</Label>
+              <Input
+                id="PaymentDate"
+                type="date"
+                value={toDateInputValue(formData.PaymentDate ?? "")}
+                onChange={(e) => setFormData({ ...formData, PaymentDate: e.target.value })}
+              />
+            </div>
+          )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit}>
-            {initialData ? "Salvar" : "Criar"}
-          </Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSubmit}>{initialData ? "Salvar" : "Criar"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
