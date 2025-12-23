@@ -1,4 +1,3 @@
-
 import { api } from "./api";
 
 export interface LoginResponse {
@@ -8,10 +7,14 @@ export interface LoginResponse {
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>("/User/login", { email, password });
-  localStorage.setItem("token", data.token);
+  const { data } = await api.post<LoginResponse>("/api/User/login", { email, password });
+
+  localStorage.setItem("authToken", data.token);
+  localStorage.setItem("isAuthenticated", "true");
+
   return data;
 }
+
 export type RegisterRequest = {
   name: string;
   email: string;
@@ -20,6 +23,6 @@ export type RegisterRequest = {
 };
 
 export const register = async (payload: RegisterRequest) => {
-  const { data } = await api.post("/auth/register", payload);
+  const { data } = await api.post("/api/User/create", payload);
   return data;
 };

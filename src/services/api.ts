@@ -6,17 +6,21 @@ const BASE = RAW.replace(/\/+$/, "");
 if (!BASE) console.warn("VITE_API_URL não definida. Configure no .env.");
 
 export const api = axios.create({
-  baseURL: BASE, // ex.: https://localhost:7274/api
+  baseURL: BASE, 
 });
 
-// Rotas públicas (não devem enviar Authorization)
 const isPublicEndpoint = (url?: string) => {
   if (!url) return false;
+
+
+  const normalized = url.replace(/\/{2,}/g, "/");
+
   return (
-    url.includes("/auth/login") ||
-    url.includes("/auth/register")
+    normalized === "/api/User/login" ||
+    normalized.startsWith("/api/User/login?")
   );
 };
+
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const url = config.url ?? "";
