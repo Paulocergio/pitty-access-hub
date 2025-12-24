@@ -36,7 +36,7 @@ const mapToFront = (a: any): AccountsPayable => ({
 });
 
 const mapToBack = (a: AccountsPayable | Omit<AccountsPayable, "Id">) => {
-  const wantsPaid = a.Status === "PAGA";
+  const wantsPaid = a.Status === "PAGO";
 
   return {
     supplier: a.SupplierName,
